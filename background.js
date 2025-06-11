@@ -61,7 +61,14 @@ function showHiddenElements() {
       if (!el.dataset.originalType) {
         el.dataset.originalType = el.type;
       }
-
+      // 新增：保存原始 opacity 和 background-color------------------------
+      if (!el.dataset.originalOpacity) {
+        el.dataset.originalOpacity = el.style.opacity || window.getComputedStyle(el).opacity;
+      }
+      if (!el.dataset.originalBackgroundColor) {
+        el.dataset.originalBackgroundColor = el.style.backgroundColor || window.getComputedStyle(el).backgroundColor;
+      }
+      // 新增：保存原始 opacity 和 background-color----尾--------------------
       // 特殊处理iframe
       if (el.tagName === "IFRAME" && el.contentDocument) {
         const iframeDoc = el.contentDocument;
@@ -71,7 +78,23 @@ function showHiddenElements() {
       processElement(el);
     });
   });
-
+  // 新增：检查所有元素的 opacity---------------------
+  document.querySelectorAll("*").forEach((el) => {
+    const style = window.getComputedStyle(el);
+    if (style.opacity === "0") {
+      // 保存原始 opacity 和 background-color（如果尚未保存）
+      if (!el.dataset.originalOpacity) {
+        el.dataset.originalOpacity = style.opacity;
+      }
+      if (!el.dataset.originalBackgroundColor) {
+        el.dataset.originalBackgroundColor = style.backgroundColor;
+      }
+      // 修改样式
+      el.style.opacity = "1";
+      el.style.backgroundColor = "red";
+    }
+  });
+  // 新增：检查所有元素的 opacity---------------------尾
   function processElement(el) {
     const style = window.getComputedStyle(el);
     const isHidden =
@@ -216,6 +239,19 @@ function showHiddenElements() {
     wrapper.querySelectorAll("*").forEach((el) => {
       el.style.position = "relative";
       el.style.zIndex = "2147483647";
+      // 新增：检查 wrapper 内部元素的 opacity------------------------------------------
+      const style = window.getComputedStyle(el);
+      if (style.opacity === "0") {
+        if (!el.dataset.originalOpacity) {
+          el.dataset.originalOpacity = style.opacity;
+        }
+        if (!el.dataset.originalBackgroundColor) {
+          el.dataset.originalBackgroundColor = style.backgroundColor;
+        }
+        el.style.opacity = "1";
+        el.style.backgroundColor = "red";
+      }
+      // 新增：检查 wrapper 内部元素的 opacity--尾----------------------------------------
     });
     wrapper.querySelectorAll("a, button").forEach((el) => {
       el.addEventListener(
@@ -257,28 +293,38 @@ function showHiddenElements() {
 
 function restoreHiddenElements() {
   // 添加class恢复选择器
-  const elements = document.querySelectorAll(
-      "[data-original-display], [data-original-hidden], [data-original-class]"
+  const elements = document.querySelectorAll(//, [data-original-type], [data-original-opacity], [data-original-background-color]"新增---------------------------
+      "[data-original-display], [data-original-hidden], [data-original-class], [data-original-type], [data-original-opacity], [data-original-background-color]"
   );
 
   elements.forEach((el) => {
     if (el.dataset.originalDisplay) {
       el.style.display = el.dataset.originalDisplay;
+      delete el.dataset.originalDisplay;
     }
     if (el.dataset.originalHidden) {
       el.hidden = el.dataset.originalHidden === "true";
+      delete el.dataset.originalHidden;
     }
     // 新增：恢复原始class
     if (el.dataset.originalClass) {
       el.className = el.dataset.originalClass;
+      delete el.dataset.originalClass;
     }
     if (el.dataset.originalType) {
       el.type = el.dataset.originalType;
+      delete el.dataset.originalType;
     }
-    delete el.dataset.originalDisplay;
-    delete el.dataset.originalHidden;
-    delete el.dataset.originalClass;
-    delete el.dataset.originalType;
+    // 新增：恢复 opacity 和 background-color------------------------------
+    if (el.dataset.originalOpacity) {
+      el.style.opacity = el.dataset.originalOpacity;
+      delete el.dataset.originalOpacity;
+    }
+    if (el.dataset.originalBackgroundColor) {
+      el.style.backgroundColor = el.dataset.originalBackgroundColor;
+      delete el.dataset.originalBackgroundColor;
+    }
+    // 新增：恢复 opacity 和 background-color------------尾------------------
   });
   // const elements = document.querySelectorAll(
   //   "[data-original-display], [data-original-hidden], [data-original-class], [data-original-type]"
@@ -307,8 +353,8 @@ function restoreHiddenElements() {
   document.querySelectorAll("iframe").forEach((iframe) => {
     if (iframe.contentDocument) {
       iframe.contentDocument
-          .querySelectorAll(
-              "[data-original-display], [data-original-hidden], [data-original-class]"
+          .querySelectorAll(//, [data-original-type], [data-original-opacity], [data-original-background-color]"新增---------------------------
+              "[data-original-display], [data-original-hidden], [data-original-class], [data-original-type], [data-original-opacity], [data-original-background-color]"
           )
           .forEach((el) => {
             if (el.dataset.originalDisplay) {
@@ -323,6 +369,20 @@ function restoreHiddenElements() {
               el.className = el.dataset.originalClass;
               delete el.dataset.originalClass;
             }
+            //----------------------------------新增
+            if (el.dataset.originalType) {
+              el.type = el.dataset.originalType;
+              delete el.dataset.originalType;
+            }
+            if (el.dataset.originalOpacity) {
+              el.style.opacity = el.dataset.originalOpacity;
+              delete el.dataset.originalOpacity;
+            }
+            if (el.dataset.originalBackgroundColor) {
+              el.style.backgroundColor = el.dataset.originalBackgroundColor;
+              delete el.dataset.originalBackgroundColor;
+            }
+            //----------------------------------新增尾
           });
     }
   });
@@ -368,7 +428,7 @@ function restoreHiddenElements() {
     }
   });
   // 删除自动添加的 submit 按钮
-  document.querySelectorAll('button[data-auto-submit="true"]').forEach(btn => {
+  document.querySelectorAll('button[data-auto-submit="true"]').forEach((btn) => {
     btn.remove();
   });
 }
