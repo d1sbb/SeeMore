@@ -118,6 +118,9 @@ function showHiddenElements() {
       el.style.display = "block";
       el.hidden = false;
       el.type = "text";
+      // 替换类名中含有 "hidden" 的部分为 "was-hidden"
+/* 好像不生效     el.className = el.className.replace(/hidden/g, "was-hidden");
+      el.style.backgroundColor = "red";*/
     }
   }
 
@@ -129,7 +132,7 @@ function showHiddenElements() {
         el.querySelector(
             'a, button, input[type="button"], input[type="submit"], [onclick], [href],input[name="oldpwd"],input[name="password"]'
         ) || // 匹配所有带 href 的标签
-        /(btn|button|click|toggle|switch|option)/i.test(el.className) || // class 名是否包含交互性关键词
+      /(btn|button|click|toggle|switch|option|hidden)/i.test(el.className) || // class 名是否包含交互性关键词
         el.matches(
             'a, button, input[type="button"], input[type="submit"], [onclick], [href],input[name="oldpwd"],input[name="password"]'
         )||el.type === "hidden"
